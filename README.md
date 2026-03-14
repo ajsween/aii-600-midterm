@@ -113,3 +113,23 @@ This analysis uses the **[Massive Missile Attacks on Ukraine](https://www.kaggle
 | `manufacturer` | Company that manufactures the weapon |
 | `guidance_system` | Type of guidance system |
 | `unit_cost` | Cost per unit |
+
+## External Data Sources
+
+| Source | API | Data Retrieved |
+|--------|-----|----------------|
+| [Sunrise-Sunset API](https://api.sunrise-sunset.org) | `https://api.sunrise-sunset.org/json` | Civil sunrise/sunset times for Kyiv (50.45°N, 30.52°E) for each attack date, used to classify attacks as day or night. |
+| [Open-Meteo Archive API](https://open-meteo.com/) | `https://archive-api.open-meteo.com/v1/archive` | Hourly cloud cover (%) for Kyiv coordinates during each attack window, averaged to produce `avg_cloud_coverage`. |
+
+Both APIs are free, require no authentication, and results are cached locally in `data/sun_cache.json` and `data/cloud_cache.json` to avoid repeated requests.
+
+## Derived Features Used in Analysis
+
+| Feature | Type | Description |
+|---------|------|-------------|
+| `is_daytime` | Binary (0/1) | 1 if the attack `time_start` falls between civil sunrise and sunset at Kyiv; 0 otherwise. |
+| `avg_cloud_coverage` | Continuous (0–100) | Mean hourly cloud cover (%) over the Kyiv region between `time_start` and `time_end` of each attack. |
+| `category_group` | Categorical | Weapon `category` with rare categories (<5 occurrences) collapsed into "Other". |
+| `model_group` | Categorical | Weapon `model` with rare models (<10 occurrences) collapsed into "Other". |
+| `observed_rate` | Continuous (0–1) | `destroyed / launched` — the observed interception rate per row. |
+| `attack_hour` | Integer (0–23) | Hour of day extracted from `time_start`. |
